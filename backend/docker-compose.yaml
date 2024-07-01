@@ -1,0 +1,39 @@
+version: '3'
+services:
+  api:
+    container_name: api    
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file:
+      - ./api/.env
+    ports:
+      - "5001:5001"
+    depends_on:
+      - chromadb
+      - ollama
+    networks:
+      - net
+
+  chromadb:
+    container_name: chromadb
+    image: chromadb/chroma:latest
+    ports:
+      - 8000:8000
+    networks:
+      - net
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    expose:
+      - 11434/tcp
+    ports:
+      - 11434:11434/tcp
+    healthcheck:
+      test: ollama --version || exit 1
+    command: serve
+
+networks:
+  net:
+    driver: bridge
