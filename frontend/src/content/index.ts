@@ -1,3 +1,7 @@
-console.log('[content] loaded ')
+console.log('[content] loaded');
 
-export {}
+// content.js
+const currentUrl = window.location.href;
+chrome.runtime.sendMessage({ action: "urlChanged", url: currentUrl });
+
+export {};

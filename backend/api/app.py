@@ -7,7 +7,7 @@ from flask import Flask, Response, request, jsonify, stream_with_context
 from chromadb import HttpClient
 from youtube_transcript_api import YouTubeTranscriptApi
 import time
-
+import requests
 
 
 app = Flask(__name__)
@@ -18,7 +18,7 @@ OpenAI_client = OpenAI(
     api_key=OPENAI_API_KEY,
 )
 
-time.sleep(10)
+time.sleep(5)
 
 # ollama setup
 OLLAMA_URL = os.environ.get('OLLAMA_URL')
@@ -32,7 +32,7 @@ chroma_client = HttpClient(host='chromadb', port=8000)
 
 # system prompt
 prompt = '''
- 
+ You are an assistant who is helping a viewer understand a youtube video. The viewer has asked a question about the video.
 '''
 
 # example of how to query from chromadb
@@ -64,8 +64,10 @@ def chat():
     data = request.json
     messages = data['messages']
     messages.insert(0, {"role": "assistant", "content": prompt})
-    model = 'llama2:chat'
+    model = 'llama3'
     video_id  = data['video_id']
+
+    print("messages", messages, flush=True)
 
     try:        
         question = messages[-1]['content']
@@ -108,11 +110,18 @@ def process_data(data):
     return documents, metadatas, ids
     
 
-@app.route('/transcript/<video_id>', methods=['GET'])
+@app.route('/api/load_transcript/<video_id>', methods=['GET'])
 def get_transcript(video_id):
 
     try:
         
+        resp = requests.get('http://chromadb:8000/api/v1/collections?tenant=default_tenant&database=default_database')
+
+        for collection in resp.json():
+            if collection["name"] == video_id:
+                return jsonify({"status": "video already loaded"}), 200
+
+
         collection = chroma_client.get_or_create_collection(name=video_id)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         documents, metadatas, ids = process_data(transcript)
@@ -126,12 +135,12 @@ def get_transcript(video_id):
             ids=ids
         )
 
-        return jsonify(transcript)
+        return jsonify({"status": "video newly loaded"}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
 
-@app.route('/question', methods=['POST'])
+@app.route('/api/question', methods=['POST'])
 def question():
     data = request.json
     question = data['question']

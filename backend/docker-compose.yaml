@@ -32,7 +32,8 @@ services:
       - 11434:11434/tcp
     healthcheck:
       test: ollama --version || exit 1
-    command: serve
+    command: 
+      - serve
 
 networks:
   net:
