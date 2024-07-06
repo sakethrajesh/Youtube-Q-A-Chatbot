@@ -7,6 +7,7 @@ import Chat from '../components/Chat';
 function App() {
   const [url, setUrl] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [loading, setLoadeding] = useState<boolean>(false);
 
   const getCurrentTabUrl = () => {
     chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB_URL' }, (response) => {
@@ -21,6 +22,7 @@ function App() {
   }
 
   const onSubmited = () => {
+    setLoadeding(true);
     chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB_URL' }, (response) => {
       setUrl(extractVideoID(response.url));
 
@@ -31,6 +33,7 @@ function App() {
         .then(data => {
           console.log(data);
           setLoaded(true);
+          setLoadeding(false);
         })
         .catch(error => {
           // Handle any errors here
@@ -42,7 +45,7 @@ function App() {
 
 
   return (
-    <>
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-gray-200">
       {
         loaded == true ?
           (<div className="App">
@@ -50,24 +53,24 @@ function App() {
           </div>)
           :
           (
-            <div className="bg-info p-5">
-              <p className="">
-                load the video
-              </p>
-              <a
-                className="btn btn-primary"
-                data-bs-toggle="collapse"
-                role="button"
-                onClick={() => onSubmited()}
-              >
-                Start
-              </a>
+            <div className="">
+              {
+                loading == false ?
+                  (
+                    <button type="button" onClick={() => onSubmited()} className="btn btn-primary">Get Started</button>
+                  )
+                  :
+                  (
+                    <button className="btn btn-primary" type="button" disabled>
+                      <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      <span role="status"> Loading...</span>
+                    </button>
+                  )
+              }
             </div>
           )
-
       }
-    </>
-
+    </div>
   );
 }
 

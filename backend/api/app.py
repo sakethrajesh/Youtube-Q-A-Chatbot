@@ -43,10 +43,16 @@ prompt = '''
 #     where_document=where_document
 # )
 
+def format_docs(docs):
+    print(docs, flush=True)
+    return docs['documents']
+
 def ollama_llm(convo, context, stream=False, model='llama2:chat'):
     question = convo[-1]['content']
     formatted_prompt = f"Question: {question}\n\nContext: {context}"
     convo[-1]['content'] = formatted_prompt
+
+    print(convo, flush=True)
 
     if model == 'gpt-4':
         return OpenAI_client.chat.completions.create(
@@ -82,8 +88,7 @@ def chat():
 
         app.logger.info(retrieved_docs)
 
-        # formatted_context = format_docs(retrieved_docs)
-        formatted_context = retrieved_docs
+        formatted_context = format_docs(retrieved_docs)
 
         text_content = ollama_llm(messages, formatted_context, model=model)
 
@@ -99,6 +104,12 @@ def process_data(data):
     metadatas = []
     ids = []
 
+    passage = ""
+
+
+    for segment in data:
+        passage += segment['text']
+
     i = 0
     for segment in data:
         documents.append(segment['text'])
@@ -107,7 +118,8 @@ def process_data(data):
 
         i += 1
 
-    return documents, metadatas, ids
+    return passage, ['0']
+    # return documents, metadatas, ids
     
 
 @app.route('/api/load_transcript/<video_id>', methods=['GET'])
@@ -124,14 +136,15 @@ def get_transcript(video_id):
 
         collection = chroma_client.get_or_create_collection(name=video_id)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        documents, metadatas, ids = process_data(transcript)
+        # documents, metadatas, ids = process_data(transcript)
+        passage, ids = process_data(transcript)
 
-        print('docsuments', documents)
-        print('metadata', metadatas)
+        print('passage', passage)
+        # print('metadata', metadatas)
 
         collection.add(
-            documents=documents,
-            metadatas=metadatas,
+            documents=passage,
+            # metadatas=metadatas,
             ids=ids
         )
 
