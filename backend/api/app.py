@@ -150,7 +150,7 @@ def get_transcript(video_id):
 
         return jsonify({"status": "video newly loaded"}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
     
 
 @app.route('/api/question', methods=['POST'])
