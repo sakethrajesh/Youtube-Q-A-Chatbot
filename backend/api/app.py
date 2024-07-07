@@ -8,6 +8,8 @@ from chromadb import HttpClient
 from youtube_transcript_api import YouTubeTranscriptApi
 import time
 import requests
+from pytube import YouTube
+import re
 
 
 app = Flask(__name__)
@@ -98,27 +100,54 @@ def chat():
         print(str(e), flush=True)
         return jsonify({"error": str(e)}), 500
     
+def get_chapters(url):
+    youtube = YouTube(url)
+    stream = youtube.streams.first()
+    desc = youtube.description
 
-def process_data(data):
+    chapters = []
+
+    lines = desc.split('\n')
+    for line in lines:
+        pattern = r'(\d{2}:\d{2}(?::\d{2})?)\s*(.*)'
+        timestamps = re.findall(pattern, line)
+        for timestamp in timestamps:
+            time, title = timestamp
+            if title == '':
+                title = 'No Title'
+            # Split the timestamp and convert to seconds
+            parts = time.split(':')
+            if len(parts) == 2:  # MM:SS format
+                parts = ['00'] + parts  
+            seconds = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            chapters.append((seconds, title))
+
+    return chapters
+
+def process_data(data, chapters):
     documents = []
     metadatas = []
     ids = []
 
-    passage = ""
+    chapter_index = 1
 
+    for i in range(1, len(chapters)):
+        chapter_end = chapters[i][0]
+        passage = ""
 
-    for segment in data:
-        passage += segment['text']
+        while data[0]['start'] < chapter_end:
+            segment = data.pop(0)
+            passage += segment['text']
+        
+        documents.append(passage)
+        metadatas.append({'chapter_name':chapters[i][1], 'duration': chapter_end - chapters[i-1][0], 'start': chapters[i-1][0]})
+        ids.append(str(chapter_index))
+        chapter_index += 1
 
-    i = 0
-    for segment in data:
-        documents.append(segment['text'])
-        metadatas.append({'duration': segment['duration'], 'start': segment['start']})
-        ids.append(str(i))
+    print('documents', documents)
+    print('metadatas', metadatas)
 
-        i += 1
-
-    return passage, ['0']
+    return documents, metadatas, ids
     # return documents, metadatas, ids
     
 
@@ -137,13 +166,16 @@ def get_transcript(video_id):
         collection = chroma_client.get_or_create_collection(name=video_id)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         # documents, metadatas, ids = process_data(transcript)
-        passage, ids = process_data(transcript)
 
-        print('passage', passage)
+        chapters = get_chapters(f"https://www.youtube.com/watch?v={video_id}")
+
+        documents, metadatas, ids = process_data(transcript, chapters)
+
+        # print('passage', passage)
         # print('metadata', metadatas)
 
         collection.add(
-            documents=passage,
+            documents=documents,
             # metadatas=metadatas,
             ids=ids
         )

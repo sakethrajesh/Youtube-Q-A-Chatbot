@@ -13,6 +13,7 @@ RUN pip install pypdf
 RUN pip install flask
 RUN pip install openai
 RUN pip install youtube-transcript-api
+RUN pip install pytube
 
 COPY app.py .
 
