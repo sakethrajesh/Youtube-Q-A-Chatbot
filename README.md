@@ -226,6 +226,11 @@ api       | Press CTRL+C to quit
 ```
 
 ## Frontend
+### User Interface
+<div style="display: flex;">
+  <img src="screenshots/chat_screen.png" width="300" alt="Chat Screen" title="Chat Screen">
+  <img src="screenshots/full_screen.png" alt="Full Screen" title="Full Screen">
+</div>
 
 ### Running Locally
 
