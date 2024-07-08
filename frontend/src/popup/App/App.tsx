@@ -36,7 +36,7 @@ function App() {
           setLoadeding(false);
         })
         .catch(error => {
-          // Handle any errors here
+
         });
     });
 
@@ -45,12 +45,14 @@ function App() {
 
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-gray-200">
+    <>
       {
         loaded == true ?
-          (<div className="App">
-            <Chat url={url} />
-          </div>)
+          (
+            <div>
+              <Chat url={url} />
+            </div>
+          )
           :
           (
             <div className="">
@@ -70,7 +72,7 @@ function App() {
             </div>
           )
       }
-    </div>
+    </>
   );
 }
 

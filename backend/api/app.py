@@ -11,7 +11,6 @@ import requests
 from pytube import YouTube
 import re
 
-
 app = Flask(__name__)
 
 # openai setup
@@ -37,19 +36,32 @@ prompt = '''
  You are an assistant who is helping a viewer understand a youtube video. The viewer has asked a question about the video.
 '''
 
-# example of how to query from chromadb
-# collection.query(
-#     query_texts=query_texts,
-#     n_results=n_results,
-#     where=where,
-#     where_document=where_document
-# )
-
 def format_docs(docs):
+    """
+    Formats the retrieved documents from ChromaDB.
+
+    Args:
+        docs (dict): The retrieved documents from ChromaDB.
+
+    Returns:
+        list: The formatted documents.
+    """
     print(docs, flush=True)
     return docs['documents']
 
 def ollama_llm(convo, context, stream=False, model='llama2:chat'):
+    """
+    Performs language model completion using Ollama or OpenAI.
+
+    Args:
+        convo (list): The conversation messages.
+        context (str): The context for the conversation.
+        stream (bool, optional): Whether to stream the completion or not. Defaults to False.
+        model (str, optional): The language model to use. Defaults to 'llama2:chat'.
+
+    Returns:
+        dict: The completion response.
+    """
     question = convo[-1]['content']
     formatted_prompt = f"Question: {question}\n\nContext: {context}"
     convo[-1]['content'] = formatted_prompt
@@ -69,6 +81,12 @@ def ollama_llm(convo, context, stream=False, model='llama2:chat'):
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
+    """
+    Handles the chat API endpoint.
+
+    Returns:
+        Response: The API response.
+    """
     data = request.json
     messages = data['messages']
     messages.insert(0, {"role": "assistant", "content": prompt})
@@ -101,6 +119,15 @@ def chat():
         return jsonify({"error": str(e)}), 500
     
 def get_chapters(url):
+    """
+    Retrieves the chapters from a YouTube video.
+
+    Args:
+        url (str): The URL of the YouTube video.
+
+    Returns:
+        list: The chapters of the video.
+    """
     youtube = YouTube(url)
     stream = youtube.streams.first()
     desc = youtube.description
@@ -125,6 +152,16 @@ def get_chapters(url):
     return chapters
 
 def process_data(data, chapters):
+    """
+    Processes the transcript data and extracts passages for each chapter.
+
+    Args:
+        data (list): The transcript data.
+        chapters (list): The chapters of the video.
+
+    Returns:
+        tuple: The processed documents, metadatas, and ids.
+    """
     documents = []
     metadatas = []
     ids = []
@@ -148,12 +185,19 @@ def process_data(data, chapters):
     print('metadatas', metadatas)
 
     return documents, metadatas, ids
-    # return documents, metadatas, ids
     
 
 @app.route('/api/load_transcript/<video_id>', methods=['GET'])
 def get_transcript(video_id):
+    """
+    Retrieves and processes the transcript of a YouTube video.
 
+    Args:
+        video_id (str): The ID of the YouTube video.
+
+    Returns:
+        Response: The API response.
+    """
     try:
         
         resp = requests.get('http://chromadb:8000/api/v1/collections?tenant=default_tenant&database=default_database')
@@ -165,18 +209,12 @@ def get_transcript(video_id):
 
         collection = chroma_client.get_or_create_collection(name=video_id)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        # documents, metadatas, ids = process_data(transcript)
-
         chapters = get_chapters(f"https://www.youtube.com/watch?v={video_id}")
 
         documents, metadatas, ids = process_data(transcript, chapters)
 
-        # print('passage', passage)
-        # print('metadata', metadatas)
-
         collection.add(
             documents=documents,
-            # metadatas=metadatas,
             ids=ids
         )
 
@@ -187,6 +225,12 @@ def get_transcript(video_id):
 
 @app.route('/api/question', methods=['POST'])
 def question():
+    """
+    Handles the question API endpoint.
+
+    Returns:
+        Response: The API response.
+    """
     data = request.json
     question = data['question']
     video_id = data['video_id']
@@ -197,8 +241,6 @@ def question():
     sources = collection.query(
         query_texts=question,
         n_results=10,
-        # where=where,
-        # where_document=where_document
     )
 
     return jsonify(sources)

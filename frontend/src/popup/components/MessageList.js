@@ -3,7 +3,7 @@ import MessageCard from './MessageCard'
 
 function MessageList({ messages }) {
     return (
-        <div class="overflow-auto" style={{height: '525px'}}>
+        <div class="overflow-auto" style={{height: '525px', backgroundColor: 'grey'}}>
             {messages.map((message, index) => (
                 <div key={index}>
                     <MessageCard message={message['content']} index={index}/>
