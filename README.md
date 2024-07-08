@@ -1,8 +1,11 @@
 # GPT for Youtube Video
+This is a Chrome extension that enables users to ask questions about YouTube videos as they watch them.
 
 ## Table of Contents
 
 - [Design](#design)
+  - [Embedding Process] (#embedding-process)
+  - [Retrieval Process] (#retrieval-process)
 - [Backend](#backend)
   - [Technologies](#technologies)
     - [Ollama](#ollama)
@@ -18,16 +21,25 @@
   - [Running Locally](#running-locally-1)
 
 ## Design
-I chose to use a RAG (Retrieval-Augmented Generation) model to solve this problem because it combines the benefits of both retrieval-based and generation-based models. 
 
-Retrieval-based models excel at finding relevant information from a large corpus of documents, which is crucial for answering questions accurately. On the other hand, generation-based models have the ability to generate human-like responses, allowing for more flexibility and creativity in the answers.
+### Embedding Process
+```mermaid
+flowchart TD
+    A[Query YouTube for Video's Transcript] --> B[Parse video description for chapter timestamps] 
+    B --> C[Cluster Transcript Segments into Chapters Based on Video Descriptions]
+    C --> D[Create Embeddings for Each Cluster]
+    D --> E[Store Embeddings in ChromaDB]
+```
 
-By using a RAG model, I can leverage the retrieval capabilities to find the most relevant information from the video transcripts stored in ChromaDB. This ensures that the answers provided are accurate and based on the actual content of the videos.
-
-Additionally, the generation component of the RAG model allows for more natural and context-aware responses. It can take into account the entire chat history and generate responses that are tailored to the specific conversation, providing a more interactive and engaging experience for the users.
-
-Overall, the RAG model provides a powerful solution for the Youtube-Q-A-Chatbot project, combining the strengths of retrieval and generation models to deliver accurate and context-aware answers to user's questions.
-
+### Retrieval Process
+```mermaid
+flowchart TD
+    A[User Asks a Question] --> B[Create Vector for User's Question]
+    B --> C[Retrieve Top Three Embeddings from ChromaDB with Highest Similarity]
+    C --> D[Use prompt engineering to format context]
+    D --> E[Send Chat History and Question Context to Ollama]
+    E --> F[Ollama Answers the Question]
+```
 
 ## Backend
 
@@ -35,7 +47,7 @@ The backend of the Youtube-Q-A-Chatbot project is responsible for handling the A
 
 ### Technologies
 #### Ollama
-> Ollama is a platform that manages setting up and running open source and custom LLMs. In this project, Ollama is hosted in the VT Discovery Kubernetes Cluster and is running Meta's Llama3 and Llama2, and Mistral. LLama3 is used to create the embedding for the youtube transcripts, which are stored in ChromaDB, and is used to generate responses to the user's prompted questions. 
+> Ollama is a platform that manages setting up and running open source and custom LLMs. In this project, Ollama is hosted in the VT Discovery Kubernetes Cluster and is running Meta's Llama3 and Llama2, and Mistral. LLama3 is used to create the embedding for the youtube transcripts, which are stored in ChromaDB, and is used to query context to provide to the LLM that generates responses to the user's prompted questions. 
 
 #### ChromaDB
 > ChromaDB is the vector database that is used in this project. ChromaDB creates a collection for each youtube video. Each collection, stores the youtube video's transcripts in chunk, each chunk's embedding, and metadata regarding which part of the video each chunk corresponds to. When a question is asked, the vector db is queried for the chuck with the highest similarity. That chuck is used as context to answer the user's questions. 

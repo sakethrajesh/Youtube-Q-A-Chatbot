@@ -27,9 +27,11 @@ print(f'Using OLLAMA_URL: {OLLAMA_URL}', flush=True)
 Ollama_client = Client(host=OLLAMA_URL)
 
 # chromadb setup
-CHROMADB_URL = os.environ.get('CHROMADB_URL')
-print(f'Using CHROMADB_URL: {CHROMADB_URL}', flush=True)
-chroma_client = HttpClient(host='chromadb', port=8000)
+CHROMADB_HOST = os.environ.get('CHROMADB_HOST')
+CHROMADB_PORT = os.environ.get('CHROMADB_PORT')
+print(f'Using CHROMADB_HOST: {CHROMADB_HOST}', flush=True)
+print(f'Using CHROMADB_PORT: {CHROMADB_PORT}', flush=True)
+chroma_client = HttpClient(host=CHROMADB_HOST, port=CHROMADB_PORT)
 
 # system prompt
 prompt = '''
