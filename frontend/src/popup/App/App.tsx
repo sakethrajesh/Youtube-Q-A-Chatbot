@@ -55,7 +55,7 @@ function App() {
           )
           :
           (
-            <div className="">
+            <div className="d-flex justify-content-center align-items-center vh-100 bg-gray-200">
               {
                 loading == false ?
                   (

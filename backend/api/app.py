@@ -166,6 +166,8 @@ def process_data(data, chapters):
     metadatas = []
     ids = []
 
+    full_transcript = ""
+
     chapter_index = 1
 
     for i in range(1, len(chapters)):
@@ -175,11 +177,15 @@ def process_data(data, chapters):
         while data[0]['start'] < chapter_end:
             segment = data.pop(0)
             passage += segment['text']
+            full_transcript += segment['text']
         
         documents.append(passage)
         metadatas.append({'chapter_name':chapters[i][1], 'duration': chapter_end - chapters[i-1][0], 'start': chapters[i-1][0]})
         ids.append(str(chapter_index))
         chapter_index += 1
+    
+    documents.append(full_transcript)
+    ids.append(str(++chapter_index))
 
     print('documents', documents)
     print('metadatas', metadatas)

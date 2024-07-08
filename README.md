@@ -197,4 +197,53 @@ This endpoint loads a given youtube video's transcript in ChromaDB (vectorDB)
 }
 ```
 
+### Running Locally
+#### Prerequisites
+- Docker
+  - `docker-compose`
+
+The backend runs in several containers that are configured to be able to see and communicate with one another.
+
+```bash
+cd backend
+```
+
+```bash
+docker compose up --build
+```
+This runs the `flask server`, `chromaDB` (vector database), and `ollama` (LLMs).
+
+All backed services are ready and running when the flask service is running (see bellow for example).
+
+```bash
+api       |  * Serving Flask app 'app'
+api       |  * Debug mode: off
+api       | WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+api       |  * Running on all addresses (0.0.0.0)
+api       |  * Running on http://127.0.0.1:5001
+api       |  * Running on http://172.26.0.3:5001
+api       | Press CTRL+C to quit
+```
+
 ## Frontend
+
+### Running Locally
+
+Prerequisites
+- NodeJS
+- `yarn`
+
+```bash
+cd frontend
+```
+
+```bash
+yarn build
+```
+This creates a directory-- `build`
+
+1. Navigate to Chrome
+2. Go to `chrome://extensions/`
+3. click `Load unpacked`
+4. Select the newly created `build` directory
+5. Navigate to a youtube video and open the chrome extension
