@@ -88,6 +88,7 @@ This endpoint takes in the chat history of the current session and returns the L
       "content": "User's message"
     }
   ],
+  "video_id": "Y45lkgfdj"
   "model": "mistral" // Optional, default is "llama3"
 }
 ```
