@@ -5,8 +5,8 @@ This is a Chrome extension that enables users to ask questions about YouTube vid
 ## Table of Contents
 
 - [Design](#design)
-  - [Embedding Process] (#embedding-process)
-  - [Retrieval Process] (#retrieval-process)
+  - [Embedding Process](#embedding-process)
+  - [Retrieval Process](#retrieval-process)
 - [Backend](#backend)
   - [Technologies](#technologies)
     - [Ollama](#ollama)
