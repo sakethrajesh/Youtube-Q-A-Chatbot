@@ -1,5 +1,22 @@
 # GPT for Youtube Video
 
+## Table of Contents
+
+- [Design](#design)
+- [Backend](#backend)
+  - [Technologies](#technologies)
+    - [Ollama](#ollama)
+    - [ChromaDB](#chromadb)
+    - [Docker](#docker)
+    - [Flask and Python](#flask-and-python)
+  - [API Docs](#api-docs)
+    - [`POST /api/chat`](#post-apichat)
+    - [`GET /api/load_transcript/<video_id>`](#get-apiload_transcriptvideo_id)
+  - [Running Locally](#running-locally)
+- [Frontend](#frontend)
+  - [User Interface](#user-interface)
+  - [Running Locally](#running-locally-1)
+
 ## Design
 I chose to use a RAG (Retrieval-Augmented Generation) model to solve this problem because it combines the benefits of both retrieval-based and generation-based models. 
 
