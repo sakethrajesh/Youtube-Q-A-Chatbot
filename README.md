@@ -1,4 +1,5 @@
 # GPT for Youtube Video
+
 This is a Chrome extension that enables users to ask questions about YouTube videos as they watch them.
 
 ## Table of Contents
@@ -23,15 +24,17 @@ This is a Chrome extension that enables users to ask questions about YouTube vid
 ## Design
 
 ### Embedding Process
+
 ```mermaid
 flowchart TD
-    A[Query YouTube for Video's Transcript] --> B[Parse video description for chapter timestamps] 
+    A[Query YouTube for Video's Transcript] --> B[Parse video description for chapter timestamps]
     B --> C[Cluster Transcript Segments into Chapters Based on Video Descriptions]
     C --> D[Create Embeddings for Each Cluster]
     D --> E[Store Embeddings in ChromaDB]
 ```
 
 ### Retrieval Process
+
 ```mermaid
 flowchart TD
     A[User Asks a Question] --> B[Create Vector for User's Question]
@@ -46,16 +49,21 @@ flowchart TD
 The backend of the Youtube-Q-A-Chatbot project is responsible for handling the API requests that interact with the RAG model pipeline to generate responses using open source self-hosted LLMs.
 
 ### Technologies
+
 #### Ollama
-> Ollama is a platform that manages setting up and running open source and custom LLMs. In this project, Ollama is hosted in the VT Discovery Kubernetes Cluster and is running Meta's Llama3 and Llama2, and Mistral. LLama3 is used to create the embedding for the youtube transcripts, which are stored in ChromaDB, and is used to query context to provide to the LLM that generates responses to the user's prompted questions. 
+
+> Ollama is a platform that manages setting up and running open source and custom LLMs. In this project, Ollama is hosted in the VT Discovery Kubernetes Cluster and is running Meta's Llama3 and Llama2, and Mistral. LLama3 is used to create the embedding for the youtube transcripts, which are stored in ChromaDB, and is used to query context to provide to the LLM that generates responses to the user's prompted questions.
 
 #### ChromaDB
-> ChromaDB is the vector database that is used in this project. ChromaDB creates a collection for each youtube video. Each collection, stores the youtube video's transcripts in chunk, each chunk's embedding, and metadata regarding which part of the video each chunk corresponds to. When a question is asked, the vector db is queried for the chuck with the highest similarity. That chuck is used as context to answer the user's questions. 
+
+> ChromaDB is the vector database that is used in this project. ChromaDB creates a collection for each youtube video. Each collection, stores the youtube video's transcripts in chunk, each chunk's embedding, and metadata regarding which part of the video each chunk corresponds to. When a question is asked, the vector db is queried for the chuck with the highest similarity. That chuck is used as context to answer the user's questions.
 
 #### Docker
-> Docker is used in the project to containerize the core components of the project and docker-compose is used to easily bring up the required containers and define the networking rules to allow the containers to interact. 
+
+> Docker is used in the project to containerize the core components of the project and docker-compose is used to easily bring up the required containers and define the networking rules to allow the containers to interact.
 
 #### Flask and Python
+
 > Flask and Python are used to handle API requests and process the chat history. Flask is a lightweight web framework in Python that allows for easy routing and handling of HTTP requests. Python, being a versatile programming language, provides the necessary tools and libraries to process the chat history and generate responses using open source self-hosted LLMs. Together, Flask and Python form the foundation of the backend architecture, enabling seamless communication between the frontend and the LLM models.
 
 ### API Docs
@@ -64,22 +72,23 @@ The backend of the Youtube-Q-A-Chatbot project is responsible for handling the A
 
 This endpoint takes in the chat history of the current session and returns the LLMs response to the question.
 
-| Parameter  | Type     | Description                                      |
-| :--------- | :------- | :----------------------------------------------- |
-| `messages` | `array`  | **Required**. Array of user's messages           |
-| `model`    | `string` | Optional. Model for chat (default: llama2:chat)  |
+| Parameter  | Type     | Description                                     |
+| :--------- | :------- | :---------------------------------------------- |
+| `messages` | `array`  | **Required**. Array of user's messages          |
+| `video_id` | `string` | **Required**. ID of Youtube Video               |
+| `model`    | `string` | Optional. Model for chat (default: llama2:chat) |
 
 ##### Example body
 
 ```json
 {
-    "messages": [
-        {
-            "role": "user",
-            "content": "User's message"
-        }
-    ],
-    "model": "mistral" // Optional, default is "llama3"
+  "messages": [
+    {
+      "role": "user",
+      "content": "User's message"
+    }
+  ],
+  "model": "mistral" // Optional, default is "llama3"
 }
 ```
 
@@ -91,9 +100,9 @@ This endpoint takes in the chat history of the current session and returns the L
 
 ```json
 {
-    "text": "Assistant's response",
-    "source_tags": ["source_tag_1", "source_tag_2"],
-    "source_documents": ["source_document_1", "source_document_2"]
+  "text": "Assistant's response",
+  "source_tags": ["source_tag_1", "source_tag_2"],
+  "source_documents": ["source_document_1", "source_document_2"]
 }
 ```
 
@@ -105,7 +114,7 @@ This endpoint takes in the chat history of the current session and returns the L
 
 ```json
 {
-    "error": "Error message"
+  "error": "Error message"
 }
 ```
 
@@ -125,7 +134,7 @@ This endpoint loads a given youtube video's transcript in ChromaDB (vectorDB).
 
 ```json
 {
-    "status":"video newly loaded" // or "video already added"
+  "status": "video newly loaded" // or "video already added"
 }
 ```
 
@@ -137,10 +146,9 @@ This endpoint loads a given youtube video's transcript in ChromaDB (vectorDB).
 
 ```json
 {
-    "error": "Error message"
+  "error": "Error message"
 }
 ```
-
 
 ### API Docs
 
@@ -211,7 +219,7 @@ This endpoint loads a given youtube video's transcript in ChromaDB (vectorDB)
 
 ```json
 {
-  "status":"video newly loaded" // or "video already added"
+  "status": "video newly loaded" // or "video already added"
 }
 ```
 
@@ -227,7 +235,9 @@ This endpoint loads a given youtube video's transcript in ChromaDB (vectorDB)
 ```
 
 ### Running Locally
+
 #### Prerequisites
+
 - Docker
   - `docker-compose`
 
@@ -240,6 +250,7 @@ cd backend
 ```bash
 docker compose up --build
 ```
+
 This runs the `flask server`, `chromaDB` (vector database), and `ollama` (LLMs).
 
 All backed services are ready and running when the flask service is running (see bellow for example).
@@ -255,7 +266,9 @@ api       | Press CTRL+C to quit
 ```
 
 ## Frontend
+
 ### User Interface
+
 <div style="display: flex;">
   <img src="screenshots/chat_screen.png" width="300" alt="Chat Screen" title="Chat Screen">
   <img src="screenshots/full_screen.png" alt="Full Screen" title="Full Screen">
@@ -264,6 +277,7 @@ api       | Press CTRL+C to quit
 ### Running Locally
 
 Prerequisites
+
 - NodeJS
 - `yarn`
 
@@ -274,6 +288,7 @@ cd frontend
 ```bash
 yarn build
 ```
+
 This creates a directory-- `build`
 
 1. Navigate to Chrome
